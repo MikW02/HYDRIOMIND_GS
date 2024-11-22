@@ -76,6 +76,8 @@ A Dashboard integra todas essas funcionalidades de maneira prática, reforçando
 
 Foi ultilizada a biblioteca (palette) node-red-dashboard
 
+json para importação do node-red: https://github.com/MikW02/HYDRIOMIND_GS/blob/main/node-red.json
+
 ![image](https://github.com/user-attachments/assets/e1cbd44e-6258-4026-88dc-5db880b45ef8)
 
 Código-fonte do esp32: https://github.com/MikW02/HYDRIOMIND_GS/blob/main/CodigoFonteEsp32
