@@ -1,0 +1,189 @@
+#include <WiFi.h>
+#include <PubSubClient.h>
+
+#define LED_PIN 16
+#define SENSOR_MOVIMENTO_PIN 4
+#define SENSOR_LUZ_PIN 33
+
+// Configurações Wi-Fi e MQTT
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
+const char* mqtt_server = "test.mosquitto.org";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+int LIMIAR_LUZ = 2050; // Limiar de luminosidade
+int TEMPO_LUZ = 15;    // Tempo em segundos para manter a luz acesa
+bool luzAcesa = false; // Estado atual da luz (acessa ou apagada)
+int tempoAcendimento = 0; // Momento em que a luz foi acesa
+
+// Temporizador para publicações
+int ultimaPublicacao = 0;
+const int intervaloPublicacao = 5000; // Intervalo entre publicações
+
+int tempoUltimaLeitura = 0; // Armazena a última vez que a leitura foi feita
+const int intervaloLeitura = 1000; // Intervalo entre leituras dos sensores
+
+// Funções declaradas
+void inicializarPinos();
+void setup_wifi();
+void reconnect();
+void mqttCallback(char* topic, byte* payload, unsigned int length);
+bool detectarMovimento();
+int verificarLuminosidade();
+void processarCondicoes(bool movimento, int intensidadeLuz);
+void acenderLuz();
+void apagarLuz();
+
+void setup() {
+  Serial.begin(115200);
+  inicializarPinos();
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(mqttCallback);
+}
+
+void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+
+  fazerLeituras();
+}
+
+void inicializarPinos() {
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(SENSOR_MOVIMENTO_PIN, INPUT);
+  apagarLuz();
+}
+
+void setup_wifi() {
+  delay(10);
+  Serial.print("Conectando a: ");
+  Serial.println(ssid);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi conectado");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+}
+
+void reconnect() {
+  while (!client.connected()) {
+    Serial.print("Tentando conexão MQTT...");
+    if (client.connect("espClient")) {
+      Serial.println("Conectado ao broker MQTT!");
+      client.subscribe("sistema/limiar");
+      client.subscribe("sistema/tempoLuz");
+    } else {
+      Serial.print("Falha, rc=");
+      Serial.print(client.state());
+      Serial.println(". Tentando novamente em 5 segundos.");
+      delay(5000);
+    }
+  }
+}
+
+void fazerLeituras() {
+  // Verifica se o intervalo para leitura dos sensores foi atingido
+  if (millis() - tempoUltimaLeitura > intervaloLeitura) {
+    tempoUltimaLeitura = millis(); 
+
+    // Realiza as leituras dos sensores
+    bool movimento = detectarMovimento();
+    int intensidadeLuz = verificarLuminosidade();
+
+    // Verifica se o intervalo para publicar dados foi atingido
+    if (millis() - ultimaPublicacao > intervaloPublicacao) {
+      // Publica as informações no broker MQTT
+      client.publish("sistema/luminosidade", String(intensidadeLuz).c_str());
+      client.publish("sistema/tempoLuzAtual", String(TEMPO_LUZ).c_str());
+      client.publish("sistema/limiarAtual", String(LIMIAR_LUZ).c_str());
+      ultimaPublicacao = millis(); // Atualiza o tempo da última publicação
+    }
+
+    // Processa as condições com base nas leituras
+    processarCondicoes(movimento, intensidadeLuz);
+  }
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  char mensagem[length + 1];
+  memcpy(mensagem, payload, length);
+  mensagem[length] = '\0';
+
+  if (strcmp(topic, "sistema/limiar") == 0) {
+    int novoLimiar = atoi(mensagem);
+    if (novoLimiar > 0) {
+      LIMIAR_LUZ = novoLimiar;
+      Serial.print("Novo limiar de luz definido: ");
+      Serial.println(LIMIAR_LUZ);
+    }
+  } else if (strcmp(topic, "sistema/tempoLuz") == 0) {
+    int novoTempo = atoi(mensagem);
+    if (novoTempo > 0) {
+      TEMPO_LUZ = novoTempo;
+      Serial.print("Novo tempo de luz definido: ");
+      Serial.println(TEMPO_LUZ);
+    }
+  }
+}
+
+bool detectarMovimento() {
+  return digitalRead(SENSOR_MOVIMENTO_PIN) == HIGH;
+}
+
+int verificarLuminosidade() {
+  int valor = analogRead(SENSOR_LUZ_PIN);
+  Serial.print("Luminosidade atual: ");
+  Serial.println(valor);
+  return valor;
+}
+
+void processarCondicoes(bool movimento, int intensidadeLuz) {
+    if (movimento && intensidadeLuz < LIMIAR_LUZ) {
+        acenderLuz();
+        tempoAcendimento = millis(); // Registra o tempo que a luz foi acesa
+        Serial.println("Movimento detectado e pouca luz natural.");
+        client.publish("sistema/luz", "Movimento detectado e pouca luz natural");
+    }
+
+    
+    if (millis() - tempoAcendimento <= TEMPO_LUZ * 1000) {
+        return;
+    }
+
+    if (!movimento && intensidadeLuz < LIMIAR_LUZ) {
+        apagarLuz();
+        Serial.println("Pouca luz natural, porém sem movimento.");
+        client.publish("sistema/luz", "Pouca luz natural, porém sem movimento");
+    }
+
+    if (movimento && intensidadeLuz >= LIMIAR_LUZ) {
+        apagarLuz();
+        Serial.println("Movimento detectado, mas muita luz natural.");
+        client.publish("sistema/luz", "Movimento detectado, mas muita luz natural.");
+    }
+
+    if (!movimento && intensidadeLuz >= LIMIAR_LUZ) {
+        apagarLuz();
+        Serial.println("Sem movimento, muita luz natural.");
+        client.publish("sistema/luz", "Sem movimento, muita luz natural");
+    }
+}
+
+void acenderLuz() {
+  digitalWrite(LED_PIN, HIGH);
+  luzAcesa = true;
+}
+
+void apagarLuz() {
+  digitalWrite(LED_PIN, LOW);
+  luzAcesa = false;
+}
