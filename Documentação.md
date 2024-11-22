@@ -1,12 +1,3 @@
-Ana Paula Nascimento Silva  RM552513  2TDSR
-
-Calina Thalya Santana Da Silva RM552523 2TDSR
-
-Anna Beatriz Soares Camargo  RM99814 2TDSA
-
-Marcelo Henrique  Borgas  RM98893 2TDSA
-
-Michael Bombo Leon RM551382 2TDSA
 
 ![image](https://github.com/user-attachments/assets/9b24d273-a3ec-4440-b072-1259492b40cc)
 
@@ -82,3 +73,15 @@ A Dashboard integra todas essas funcionalidades de maneira prática, reforçando
 ![image](https://github.com/user-attachments/assets/e1cbd44e-6258-4026-88dc-5db880b45ef8)
 
 Código-fonte do esp32: https://github.com/MikW02/HYDRIOMIND_GS/blob/main/CodigoFonteEsp32
+
+
+Ana Paula Nascimento Silva  RM552513  2TDSR
+
+Calina Thalya Santana Da Silva RM552523 2TDSR
+
+Anna Beatriz Soares Camargo  RM99814 2TDSA
+
+Marcelo Henrique  Borgas  RM98893 2TDSA
+
+Michael Bombo Leon RM551382 2TDSA
+
