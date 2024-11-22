@@ -81,4 +81,4 @@ Oferece um controle ajustável para configurar o temporizador da luz em segundos
 A Dashboard integra todas essas funcionalidades de maneira prática, reforçando o objetivo do projeto de combinar eficiência e usabilidade, ao mesmo tempo que promove a economia de energia através de ajustes simples e precisos.
 ![image](https://github.com/user-attachments/assets/e1cbd44e-6258-4026-88dc-5db880b45ef8)
 
-
+Código-fonte do esp32: https://github.com/MikW02/HYDRIOMIND_GS/blob/main/CodigoFonteEsp32
