@@ -52,6 +52,9 @@ Receber configurações remotas via MQTT, como o limiar de luz e o tempo que a l
 
 ![image](https://github.com/user-attachments/assets/a90696e8-77fb-48d0-84ae-de90d5f1aa5b)
 
+![image](https://github.com/user-attachments/assets/e80bf67d-5d7f-4b0f-8644-6542cd6126f6)
+
+
 Na Dashboard do Node-RED desenvolvida para este projeto, foram implementadas funcionalidades que permitem monitorar e controlar diversos aspectos do sistema em tempo real. A interface foi projetada para ser intuitiva e interativa, com as seguintes características principais:
 
 Controlador de Sensor de Luz:
@@ -70,6 +73,9 @@ Controlador de Tempo de Desligamento das Luzes:
 Exibe o tempo atual em que a luz está ligada, ajudando no acompanhamento do sistema em funcionamento.
 Oferece um controle ajustável para configurar o temporizador da luz em segundos, determinando por quanto tempo a luz deve permanecer acesa após ativada.
 A Dashboard integra todas essas funcionalidades de maneira prática, reforçando o objetivo do projeto de combinar eficiência e usabilidade, ao mesmo tempo que promove a economia de energia através de ajustes simples e precisos.
+
+Foi ultilizada a biblioteca (palette) node-red-dashboard
+
 ![image](https://github.com/user-attachments/assets/e1cbd44e-6258-4026-88dc-5db880b45ef8)
 
 Código-fonte do esp32: https://github.com/MikW02/HYDRIOMIND_GS/blob/main/CodigoFonteEsp32
