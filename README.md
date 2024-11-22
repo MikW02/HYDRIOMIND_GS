@@ -17,4 +17,5 @@ https://wokwi.com/projects/415203281283016705
 json para importação do node-red:
 https://github.com/MikW02/HYDRIOMIND_GS/blob/main/node-red.json
 
+mqtt: test.mosquitto.org
 Foi ultilizada a biblioteca (palette) node-red-dashboard node-red
